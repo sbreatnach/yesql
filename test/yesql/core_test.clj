@@ -6,9 +6,10 @@
 (def derby-db {:subprotocol "derby"
                :subname (gensym "memory:")
                :create true})
+(def query-location "yesql/sample_files")
 
 (defquery current-time-query "yesql/sample_files/current_time.sql")
-(defquery mixed-parameters-query "yesql/sample_files/mixed_parameters.sql")
+(defquery mixed-parameters-query (format "%s/mixed_parameters.sql" query-location))
 
 ;;; Check we can start up the test DB.
 (expect (more-> java.sql.Timestamp (-> first :1))
@@ -45,6 +46,11 @@
 (expect-let [return-value (defqueries "yesql/sample_files/combined_file.sql")]
   [(var the-time) (var sums) (var edge)]
   return-value)
+
+;;; Check defqueries returns the list of defined vars when using function to evaluate path.
+(expect-let [return-value (defqueries (format "%s/combined_file.sql" query-location))]
+            [(var the-time) (var sums) (var edge)]
+            return-value)
 
 ;;; SQL's quoting rules.
 (defquery quoting "yesql/sample_files/quoting.sql")
